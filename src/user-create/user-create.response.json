@@ -1,0 +1,18 @@
+{
+  "$id": "https://my-web-site.com/user-create.response.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "userId": {
+      "type": "string",
+      "description": "the id of the created user"
+    },
+    "errorCode": {
+      "type": "number",
+      "description": "error code if user creation failed"
+    },
+    "errorMessage": {
+      "type": "string",
+      "description": "error message if user creation failed"
+    }
+  }
+}
