@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <title>JSON Schema presentation</title>
+
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/reveal.css" />
+    <link rel="stylesheet" href="css/theme/black.css" />
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/monokai.css" />
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match(/print-pdf/gi)
+        ? 'css/print/pdf.css'
+        : 'css/print/paper.css';
+      document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>JSON Schema</section>
+        <section>
+          <p>What is JSON Schema ?</p>
+          <p class="fragment">
+            JSON Schema is a specification for JSON based format for defining
+            the structure of JSON data
+          </p>
+        </section>
+        <section>
+          <p>What it looks like ?</p>
+          <pre>
+            <code data-trim>
+            {
+              "$id": "https://my-web-site.com/user-create.request.json",
+              "$schema": "http://json-schema.org/draft-07/schema#",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "description": "account email"
+                },
+                "password": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9#@!]{6,}$"
+                }
+              },
+              "required": ["email", "password"]
+            }
+          </code>
+        </pre>
+        </section>
+        <section>
+          <h2>We can use it :</h2>
+          <p class="fragment">to validate response/request for our gateway</p>
+          <p class="fragment">
+            to validate incoming data in our micro-services
+          </p>
+        </section>
+        <section>
+          <span>But also to validate db operations since MongoDB 3.6</span>
+          <pre>
+            <code data-trim>
+              {
+                $jsonSchema: {
+                    required: [ "name", "major", "gpa", "address" ],
+                    properties: {
+                      name: {
+                          bsonType: "string",
+                          description: "must be a string and is required"
+                      },
+                      address: {
+                          bsonType: "object",
+                          required: [ "zipcode" ],
+                          properties: {
+                              "street": { bsonType: "string" },
+                              "zipcode": { bsonType: "string" }
+                          }
+                      }
+                    }
+                }
+              }
+            </code>
+          </pre>
+          <i>
+            https://docs.mongodb.com/manual/reference/operator/query/jsonSchema/</i
+          >
+        </section>
+        <section>
+          <p>Primitive Types</p>
+          <ul>
+            <li>string</li>
+            <li>number</li>
+            <li>integer</li>
+            <li>object</li>
+            <li>array</li>
+            <li>boolean</li>
+            <li>null</li>
+          </ul>
+        </section>
+        <section>
+          <p>Strings can have restrictions</p>
+          <ul>
+            <li>minLength</li>
+            <li>maxLength</li>
+          </ul>
+        </section>
+        <section>
+          <p>Strings support patterns</p>
+          <pre>
+            <code data-trim>
+              "password": {
+                "type": "string",
+                "pattern": "^[a-z0-9#@!]{6,}$"
+              }
+            </code>
+          </pre>
+        </section>
+        <section>
+          <p>Strings come with built-in formats</p>
+          <pre>
+            <code>
+              date-time, time, date (RFC 3339 / ISO8601)
+              email (RFC 5322), idn-email (RFC5890)
+              ipv4, ipv6
+              ...
+            </code>
+          </pre>
+        </section>
+        <section>
+          <p>And enum is supported too</p>
+          <pre>
+            <code>
+              {
+                "type": "string",
+                "enum": ["red", "amber", "green"]
+              }
+            </code>
+          </pre>
+        </section>
+        <section>
+          <p>Number and Integer can have restrictions</p>
+          <pre>
+            <code data-trim>
+              minimum <= x
+              exclusiveMinimum < x
+              maximum >= x
+              exclusiveMaximum >x
+              multipleOf
+            </code>
+          </pre>
+        </section>
+        <section>
+          <p>Objects can have restrictions</p>
+          <pre>
+            <code data-trim class="hljs" data-line-numbers="13-14">
+              {
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "account email"
+                  },
+                  "password": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9#@!]{6,}$"
+                  }
+                },
+                "required": ["email", "password"],
+                "additionalProperties": false
+              }
+            </code>
+          </pre>
+        </section>
+        <section>
+          <p>Array can have restrictions</p>
+          <pre>
+            <code data-trim>
+              {
+                "type": "array",
+                "items": "number", // type of items
+                "minItems": 2,
+                "maxItems": 3,
+                "uniqueItems": true // uniqueness
+              }
+            </code>
+          </pre>
+        </section>
+        <section>
+          <p>You can validate against many schemas</p>
+          <pre>
+            <code data-trim>
+              {
+                "anyOf": [
+                  { "type": "string", "maxLength": 5 },
+                  { "type": "number", "minimum": 0 }
+                ]
+              }
+            </code>
+          </pre>
+        </section>
+        <section>
+          <p>You can validate against all schemas</p>
+          <pre>
+            <code data-trim>
+              {
+                "allOf": [
+                  { "type": "string" },
+                  { "maxLength": 5 }
+                ]
+              }
+            </code>
+          </pre>
+        </section>
+        <section>
+          <p>You can validate against one of the given schemas</p>
+          <pre>
+            <code data-trim>
+              {
+                "oneOf": [
+                  { "type": "number", "multipleOf": 5 },
+                  { "type": "number", "multipleOf": 3 }
+                ]
+              }
+            </code>
+          </pre>
+        </section>
+        <section>
+          <h2>Ok, and how do i use it in my TS project ?</h2>
+          <p class="fragment">there's a npm for that</p>
+          <p class="fragment">AJV</p>
+        </section>
+        <section>
+          <p>And it is really simple to use</p>
+          <pre>
+            <code data-trim>
+              const ajv = new Ajv();
+              const valid = ajv.validate(schema, data);
+
+              if (valid) return true;
+              throw new Error(ajv.errors?.toString());
+            </code>
+          </pre>
+        </section>
+        <section>
+          <h1>Tips for TS projects</h1>
+        </section>
+        <section>
+          <h2>JSON Import</h2>
+          <div class="fragment">
+            <p>Activate JSON Import in tsconfig.json</p>
+            <pre>
+              <code data-trim>
+                "resolveJsonModule": true
+              </code>
+            </pre>
+          </div>
+          <div class="fragment">
+            <p>And then you can</p>
+            <pre>
+              <code data-trim>
+                import inputSchema from './user-create.request.json';
+              </code>
+            </pre>
+          </div>
+        </section>
+        <section>
+          <h2>Happy Coding ;)</h2>
+        </section>
+      </div>
+    </div>
+
+    <script src="js/reveal.js"></script>
+
+    <script>
+      // More info about config & dependencies:
+      // - https://github.com/hakimel/reveal.js#configuration
+      // - https://github.com/hakimel/reveal.js#dependencies
+      Reveal.initialize({
+        hash: true,
+        dependencies: [
+          { src: 'plugin/markdown/marked.js' },
+          { src: 'plugin/markdown/markdown.js' },
+          { src: 'plugin/highlight/highlight.js' },
+          { src: 'plugin/notes/notes.js', async: true },
+        ],
+        width: '90%',
+      });
+      Reveal.configure({
+        slideNumber: true,
+      });
+    </script>
+  </body>
+</html>

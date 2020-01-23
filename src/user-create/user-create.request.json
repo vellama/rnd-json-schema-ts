@@ -11,5 +11,7 @@
       "type": "string",
       "pattern": "^[a-z0-9#@!]{6,}$"
     }
-  }
+  },
+  "required": ["email", "password"],
+  "additionalProperties": false
 }
