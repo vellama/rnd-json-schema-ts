@@ -30,9 +30,9 @@
   <body>
     <div class="reveal">
       <div class="slides">
-        <section>JSON Schema</section>
+        <section><h1>JSON Schema</h1></section>
         <section>
-          <p>What is JSON Schema ?</p>
+          <h2>What is JSON Schema ?</h2>
           <p class="fragment">
             JSON Schema is a specification for JSON based format for defining
             the structure of JSON data
@@ -41,7 +41,7 @@
         <section>
           <p>What it looks like ?</p>
           <pre>
-            <code data-trim>
+            <code data-trim class="hljs" data-line-numbers="2-3,4,15">
             {
               "$id": "https://my-web-site.com/user-create.request.json",
               "$schema": "http://json-schema.org/draft-07/schema#",
@@ -120,9 +120,11 @@
           <p>Strings support patterns</p>
           <pre>
             <code data-trim>
-              "password": {
-                "type": "string",
-                "pattern": "^[a-z0-9#@!]{6,}$"
+              {
+                "password": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9#@!]{6,}$"
+                }
               }
             </code>
           </pre>
@@ -237,6 +239,75 @@
           </pre>
         </section>
         <section>
+          <h2>Difference between oneOf and anyOf</h2>
+          <p class="fragment">
+            if your data matches more than one schema, oneOf will fail
+          </p>
+        </section>
+        <section>
+          <h2>Does it scale ?</h2>
+          <p class="fragment">yes, and you can combine schemas using $ref</p>
+        </section>
+        <section>
+          <p>short example with $ref</p>
+          <pre>
+            <code data-trim>
+            {
+              "$schema": "http://json-schema.org/draft-07/schema#",
+
+              "definitions": {
+                "address": {
+                  "type": "object",
+                  "properties": {
+                    "street_address": { "type": "string" },
+                    "city":           { "type": "string" },
+                    "state":          { "type": "string" }
+                  },
+                  "required": ["street_address", "city", "state"]
+                }
+              },
+            
+              "type": "object",
+            
+              "properties": {
+                "billing_address": { "$ref": "#/definitions/address" },
+                "shipping_address": { "$ref": "#/definitions/address" }
+              }
+            }
+            </code>
+          </pre>
+        </section>
+        <section>
+          <p>recursion is allowed too</p>
+          <pre>
+            <code data-trim>
+              {
+                "$schema": "http://json-schema.org/draft-07/schema#",
+              
+                "definitions": {
+                  "person": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string" },
+                      "children": {
+                        "type": "array",
+                        "items": { "$ref": "#/definitions/person" },
+                        "default": []
+                      }
+                    }
+                  }
+                },
+              
+                "type": "object",
+              
+                "properties": {
+                  "person": { "$ref": "#/definitions/person" }
+                }
+              }
+            </code>
+          </pre>
+        </section>
+        <section>
           <h2>Ok, and how do i use it in my TS project ?</h2>
           <p class="fragment">there's a npm for that</p>
           <p class="fragment">AJV</p>
@@ -250,6 +321,17 @@
 
               if (valid) return true;
               throw new Error(ajv.errors?.toString());
+            </code>
+          </pre>
+        </section>
+        <section>
+          <p>You can remove additional properties</p>
+          <pre>
+            <code data-trim>
+              var ajv = new Ajv({ removeAdditional: true });
+              ...
+              var validate = ajv.compile(schema);
+              const result = validate(data);
             </code>
           </pre>
         </section>
